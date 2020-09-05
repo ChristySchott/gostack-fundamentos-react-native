@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 
 import AsyncStorage from '@react-native-community/async-storage';
+import api from 'src/services/api';
 
 interface Product {
   id: string;
@@ -36,8 +37,22 @@ const CartProvider: React.FC = ({ children }) => {
     loadProducts();
   }, []);
 
-  const addToCart = useCallback(async product => {
-    // TODO ADD A NEW ITEM TO THE CART
+  const addToCart = useCallback(async ({ id, title, image_url, price }) => {
+    const response = await api.post('/products', {
+      id,
+      title,
+      image_url,
+      price,
+    });
+
+    const { token, user } = response.data;
+
+    await AsyncStorage.multiSet([
+      ['@GoEnglish:token', token],
+      ['@GoEnglish: user', JSON.stringify(user)],
+    ]);
+
+    setData({ token, user });
   }, []);
 
   const increment = useCallback(async id => {
